@@ -1,24 +1,25 @@
 
-#include "Definitions.h"
-
-
 /* Programa para monitorear el comportamiento del prototipo HackBerry (protesís de mano)
 
                 Autor: José Luis Cruz Tecocoatzi
 
 */
 
+#include "Definitions.h"
+
+
+
 
 Servo ServoOther,ServoIndex,ServoThumb;
 
 
 
-uint8_t state = S_OPEN; //Estado actual lo colocamos en paro
+uint8_t state = S_OPEN; //Estado actual mano abierta 
 
 
 int pos = 0;
 int val1, val2, val3;
-char Posicion[10];
+char Valores[10];
 
 
 uint8_t leds[4]{
@@ -32,31 +33,32 @@ uint8_t leds[4]{
 //Funciones para los movimientos de la mano
 
 void Close(){
-  ServoOther.write(120);
-  ServoIndex.write(10);
-  ServoThumb.write(135);  
-
-
-
+  ServoOther.write(180);
+  ServoIndex.write(15);
+  ServoThumb.write(50);  
 }
 
 void Open(){
 
     ServoOther.write(0);
     ServoIndex.write(150);
-    ServoThumb.write(115);
+    ServoThumb.write(135);
+}
+
+void RelaxI(){
+
+    ServoOther.write(0);
+    ServoIndex.write(80);
+
 }
 
 
-void Relax(){
+void RelaxT(){
 
-    ServoThumb.write(10);
+    ServoOther.write(0);
+    ServoIndex.write(150);
+    ServoThumb.write(40);  
 }
-
-
-
-
-
 
 
 void setup() {
@@ -70,7 +72,7 @@ void setup() {
   ServoThumb.attach(11); //Servo thumb
 
  
-  pinMode(SENSOR,OUTPUT);
+  
   
  
 
@@ -78,7 +80,9 @@ void setup() {
 
 void loop() {
   
-  int currentVoltage = analogRead(A1);  
+  int currentVoltage = analogRead(SENSOR);  
+  int currentVoltage2 = analogRead(SENSOR2); 
+  sprintf(Valores, "%d:%d", currentVoltage, currentVoltage2);
 
   switch(state){
 
@@ -90,20 +94,32 @@ void loop() {
    
     
        if(currentVoltage > voltageThreshold){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_CLOSE;
             break;
         } 
 
+        if(currentVoltage2 > voltageThreshold2){
+            Serial.println(Valores);
+            state = S_THUMB;
+            break;
+        } 
+
           
-       if (currentVoltage > 200 && currentVoltage < 600){
-          Serial.println(currentVoltage);
-          state = S_RELAX;
+       if (currentVoltage > 200 && currentVoltage < 500){
+          Serial.println(Valores);
+          state = S_THUMB;
+          break;
+       }  
+
+        if (currentVoltage > 500 && currentVoltage < voltageThreshold){
+          Serial.println(Valores);
+          state = S_INDEX;
           break;
        }  
 
        if(currentVoltage < 200 ){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_OPEN;
             break;
         } 
@@ -111,27 +127,41 @@ void loop() {
         
     break;
 
-    case S_RELAX:
-    Relax();
-    Serial.println("Mano Relajada");
+    case S_THUMB:
+    //RelaxT();
+    Close();
+    //Open();
+    Serial.println("Pulgar abierto");
     delay(10);
     
       
        if(currentVoltage > voltageThreshold){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_CLOSE;
             break;
         } 
 
+        if(currentVoltage2 > voltageThreshold2){
+            Serial.println(Valores);
+            state = S_THUMB;
+            break;
+        } 
+
           
-       if (currentVoltage > 200 && currentVoltage < 600){
-          Serial.println(currentVoltage);
-          state = S_RELAX;
+       if (currentVoltage > 200 && currentVoltage < 500){
+          Serial.println(Valores);
+          state = S_THUMB;
+          break;
+       }  
+
+        if (currentVoltage > 500 && currentVoltage < voltageThreshold){
+          Serial.println(Valores);
+          state = S_INDEX;
           break;
        }  
 
        if(currentVoltage < 200 ){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_OPEN;
             break;
         } 
@@ -142,26 +172,40 @@ void loop() {
 
 
     case S_CLOSE:
-    Close();
+    Open();
+    //Close();
     Serial.println("Mano cerrada");
     delay(10);
 
         
        if(currentVoltage > voltageThreshold){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_CLOSE;
             break;
         } 
 
+        if(currentVoltage2 > voltageThreshold2){
+            Serial.println(Valores);
+            state = S_THUMB;
+            break;
+        } 
+
+
           
-       if (currentVoltage > 200 && currentVoltage < 600){
-          Serial.println(currentVoltage);
-          state = S_RELAX;
+       if (currentVoltage > 200 && currentVoltage < 500){
+          Serial.println(Valores);
+          state = S_OPEN;
+          break;
+       }  
+
+        if (currentVoltage > 500 && currentVoltage < voltageThreshold){
+          Serial.println(Valores);
+          state = S_OPEN;
           break;
        }  
 
        if(currentVoltage < 200 ){
-            Serial.println(currentVoltage);
+            Serial.println(Valores);
             state = S_OPEN;
             break;
         } 
@@ -171,6 +215,50 @@ void loop() {
     
     break;
       
+
+    case S_INDEX:
+    //Open();
+    Close();
+    //RelaxI();
+    Serial.println("Dedo indice ");
+    delay(10);
+
+        
+       if(currentVoltage > voltageThreshold){
+            Serial.println(Valores);
+            state = S_CLOSE;
+            break;
+        } 
+
+        if(currentVoltage2 > voltageThreshold2){
+            Serial.println(Valores);
+            state = S_THUMB;
+            break;
+        } 
+
+          
+       if (currentVoltage > 200 && currentVoltage < 500){
+          Serial.println(Valores);
+          state = S_THUMB;
+          break;
+       }  
+
+       if (currentVoltage > 500 && currentVoltage < voltageThreshold){
+          Serial.println(Valores);
+          state = S_INDEX;
+          break;
+       }  
+
+       if(currentVoltage < 200 ){
+            Serial.println(Valores);
+            state = S_OPEN;
+            break;
+        } 
+         
+        
+     
+    
+    break;  
     
     
     }
