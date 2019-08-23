@@ -13,11 +13,12 @@
 #define S_INDEX 3
 
 
+
 #define SENSOR A0
 #define SENSOR2 A1
 #define LED 13
-#define voltageThreshold 850 //890
-#define voltageThreshold2 850
+#define voltageThreshold 895 ///mayor a este valor musculo RELAJADO, MENOr TENSADO
+#define voltageThreshold2 890 ///mayor a este valor musculo RELAJADO, MENOr TENSADO
 
 
 
